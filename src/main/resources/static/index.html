@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Bus Seat Allocation System | Transportation Department</title>
+  <meta name="description" content="Official college bus seat allocation portal. Declare daily travel, view assigned buses and seats, and access transportation schedules.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Institutional Bar -->
+  <header class="site-header">
+    <div class="top-bar">
+      <div class="container top-bar-content">
+        <span>Department of Student Transportation &amp; Fleet Logistics</span>
+        <span>Operational Portal &bull; Academic Year 2026-2027</span>
+      </div>
+    </div>
+    <div class="container nav-bar">
+      <a href="index.html" class="site-brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 6v6"></path>
+            <path d="M16 6v6"></path>
+            <path d="M4 12h16"></path>
+            <path d="M6 18h.01"></path>
+            <path d="M18 18h.01"></path>
+            <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+            <path d="M4 19v2"></path>
+            <path d="M20 19v2"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>College Bus Seat Allocation System</h1>
+          <p>Official Transportation Portal</p>
+        </div>
+      </a>
+      <nav aria-label="Main Navigation">
+        <ul class="site-nav">
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="student.html">Student Declaration</a></li>
+          <li><a href="student.html#tab-lookup">Check Seat Assignment</a></li>
+          <li><a href="admin.html">Admin Console</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+          <li><a href="terms.html">Terms</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Notice Strip -->
+  <div class="notice-strip">
+    <div class="container">
+      <strong>Important Notice:</strong> Daily travel declarations for the next academic day must be submitted before <strong>09:00 PM</strong>. Bus assignments are published immediately after allocation processing.
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <section class="page-hero">
+    <div class="container">
+      <h2>College Transportation Management Portal</h2>
+      <p>A unified system for daily student travel declarations, algorithmic bus capacity scheduling, and automated seat assignments across all college transit routes.</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="main-content container">
+
+    <!-- Action Cards -->
+    <div class="grid-3" style="margin-bottom: 28px;">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Student Travel Declaration</h3>
+            <p class="card-subtitle">Daily trip declaration for students</p>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Declare whether you will travel to college on your scheduled date, select your transit route, and pick your operating shift before the cutoff.
+        </p>
+        <a href="student.html" class="btn btn-primary btn-block">Declare Travel Intent</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Seat &amp; Bus Verification</h3>
+            <p class="card-subtitle">Check confirmed seat allocation</p>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Lookup your assigned college bus number, vehicle details, and individual seat assignment using your Student ID and Access PIN.
+        </p>
+        <a href="student.html#tab-lookup" class="btn btn-secondary btn-block">Check Assigned Seat</a>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Administrative Operations</h3>
+            <p class="card-subtitle">Fleet dispatch &amp; allocation engine</p>
+          </div>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          Access the fleet management dashboard, view real-time student declarations by route and shift, execute the allocation algorithm, and inspect passenger manifests.
+        </p>
+        <a href="admin.html" class="btn btn-secondary btn-block">Open Admin Console</a>
+      </div>
+    </div>
+
+    <!-- Active Route Network Schedule -->
+    <section class="card" style="margin-bottom: 28px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Active College Bus Routes &amp; Operational Shifts</h3>
+          <p class="card-subtitle">Verified route itineraries and shift departure timings</p>
+        </div>
+        <button id="btnRefreshRoutes" class="btn btn-secondary btn-sm" onclick="loadLiveNetwork()">Refresh Routes</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table" id="routesNetworkTable">
+          <thead>
+            <tr>
+              <th>Route Code</th>
+              <th>Route Name</th>
+              <th>Origin Boarding Point</th>
+              <th>Intermediate Stops</th>
+              <th>Destination</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="routesNetworkTbody">
+            <tr>
+              <td colspan="6" class="empty-state">
+                <span class="loading-spinner"></span> Loading route network schedule...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Operational Guidelines Grid -->
+    <section class="grid-2">
+      <div class="card">
+        <h4 style="color: var(--primary); font-size: 14.5px; margin-bottom: 10px;">Standard Operating Procedure for Students</h4>
+        <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+          <li>All registered student commuters must submit a travel declaration for each scheduled college day.</li>
+          <li>Declarations can be updated without penalty up until <strong>09:00 PM</strong> of the previous evening.</li>
+          <li>A unique access PIN prevents unauthorized modification of records.</li>
+          <li>Allocated seats are non-transferable and verified upon boarding.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 style="color: var(--primary); font-size: 14.5px; margin-bottom: 10px;">Automated Capacity Allocation Rules</h4>
+        <ul style="padding-left: 20px; font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+          <li>Greedy capacity algorithm matches declared passenger counts to available buses.</li>
+          <li>Strict vehicle dispatch rules prevent double-booking or overlapping assignments for any bus.</li>
+          <li>Insufficient capacity triggers immediate notifications to fleet dispatchers.</li>
+          <li>Each passenger is designated an individual seat number on their assigned bus manifest.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div>
+        <strong style="color: #ffffff;">College Transportation &amp; Fleet Management System</strong>
+        <p style="margin-top: 4px;">Official institutional transportation service and seat allocation platform.</p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms &amp; Conditions</a></li>
+        <li><a href="student.html">Student Portal</a></li>
+        <li><a href="admin.html">Admin Portal</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      &copy; 2026 College Transportation Logistics Office. All operational records managed securely via Spring Boot and MySQL.
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', loadLiveNetwork);
+
+    async function loadLiveNetwork() {
+      const tbody = document.getElementById('routesNetworkTbody');
+      try {
+        const resp = await apiFetch('/student/routes');
+        const routes = resp.data || [];
+        if (routes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No routes currently active.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = routes.map(r => `
+          <tr>
+            <td><strong>${escapeHtml(r.routeCode)}</strong></td>
+            <td>${escapeHtml(r.routeName)}</td>
+            <td>${escapeHtml(r.startLocation)}</td>
+            <td><small>${escapeHtml(r.stopsDescription)}</small></td>
+            <td>${escapeHtml(r.endLocation)}</td>
+            <td><span class="badge ${r.active ? 'badge-success' : 'badge-secondary'}">${r.active ? 'Active' : 'Inactive'}</span></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="alert alert-danger">${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+  </script>
+</body>
+</html>

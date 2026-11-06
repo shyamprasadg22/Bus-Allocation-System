@@ -1,0 +1,30 @@
+package com.college.busallocation.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    private final AdminAuthInterceptor adminAuthInterceptor;
+
+    public WebMvcConfig(AdminAuthInterceptor adminAuthInterceptor) {
+        this.adminAuthInterceptor = adminAuthInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // Protect all Admin and Allocation endpoints
+        registry.addInterceptor(adminAuthInterceptor)
+                .addPathPatterns("/api/admin/**", "/api/allocation/**")
+                .excludePathPatterns("/api/admin/auth/login");
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
+    }
+}

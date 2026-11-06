@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrative Console | College Bus Seat Allocation System</title>
+  <meta name="description" content="Transportation department management console for fleet allocation, route management, and passenger manifest oversight.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="alternate icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .admin-subnav {
+      display: flex;
+      gap: 12px;
+      background-color: #FFFFFF;
+      padding: 10px 16px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+    .admin-nav-item {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      transition: background-color var(--transition-fast), color var(--transition-fast);
+    }
+    .admin-nav-item:hover {
+      background-color: var(--bg-subtle);
+      color: var(--primary);
+    }
+    .admin-nav-item.active {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .admin-view {
+      display: none;
+    }
+    .admin-view.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Institutional Bar -->
+  <header class="site-header">
+    <div class="top-bar">
+      <div class="container top-bar-content">
+        <span>Transportation Fleet Logistics Console</span>
+        <span id="adminSessionStatus">Authorized Access Only</span>
+      </div>
+    </div>
+    <div class="container nav-bar">
+      <a href="index.html" class="site-brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 6v6"></path>
+            <path d="M16 6v6"></path>
+            <path d="M4 12h16"></path>
+            <path d="M6 18h.01"></path>
+            <path d="M18 18h.01"></path>
+            <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+            <path d="M4 19v2"></path>
+            <path d="M20 19v2"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>College Bus Seat Allocation System</h1>
+          <p>Administrative Console</p>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span id="adminUserBadge" style="font-size: 13px; color: #cbd5e1; font-weight: 500;"></span>
+        <button id="btnAdminLogout" class="btn btn-secondary btn-sm" style="display: none;">Sign Out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notice Strip -->
+  <div class="notice-strip">
+    <div class="container">
+      <strong>Administrative Control Notice:</strong> Allocation runs are repeatable and recalculate passenger-to-bus mappings cleanly without creating duplicate records. Overlapping bus assignments across the same shift are prevented.
+    </div>
+  </div>
+
+  <main class="main-content container">
+
+    <!-- LOGIN SECTION (Shown when not authenticated) -->
+    <section id="adminLoginSection" style="max-width: 460px; margin: 40px auto 60px;">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title">Administrator Authentication</h3>
+            <p class="card-subtitle">Transportation operations management</p>
+          </div>
+        </div>
+
+        <div class="alert alert-info">
+          <strong>Default Demonstration Credentials:</strong><br>
+          Username: <code>admin</code><br>
+          Password: <code>admin123</code>
+        </div>
+
+        <div id="adminLoginAlert"></div>
+
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label for="loginUsername" class="form-label">Username</label>
+            <input type="text" id="loginUsername" class="form-control" value="admin" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" id="loginPassword" class="form-control" value="admin123" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="btnLoginSubmit" class="btn btn-primary btn-block" style="margin-top: 10px;">
+            Sign In to Management Console
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- AUTHENTICATED CONSOLE SECTION -->
+    <div id="adminConsoleSection" style="display: none;">
+
+      <!-- Subnavigation -->
+      <nav class="admin-subnav" aria-label="Admin console navigation">
+        <a href="#allocations" class="admin-nav-item active" data-view="viewAllocations">Allocation Engine</a>
+        <a href="#declarations" class="admin-nav-item" data-view="viewDeclarations">Travel Declarations</a>
+        <a href="#buses" class="admin-nav-item" data-view="viewBuses">Bus Fleet Management</a>
+        <a href="#routes" class="admin-nav-item" data-view="viewRoutes">Route Network</a>
+        <a href="#metrics" class="admin-nav-item" data-view="viewMetrics">System Metrics</a>
+      </nav>
+
+      <!-- VIEW 1: ALLOCATION ENGINE -->
+      <section class="admin-view active" id="viewAllocations">
+        <!-- Run Allocation Form Card -->
+        <div class="card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Execute Bus Seat Allocation Algorithm</h3>
+              <p class="card-subtitle">Greedy capacity-based assignment with overlapping vehicle conflict prevention</p>
+            </div>
+          </div>
+
+          <div id="allocAlert"></div>
+
+          <form id="runAllocationForm">
+            <div class="grid-3">
+              <div class="form-group">
+                <label for="allocDate" class="form-label">Travel Date <span class="required">*</span></label>
+                <input type="date" id="allocDate" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label for="allocShift" class="form-label">Shift <span class="required">*</span></label>
+                <select id="allocShift" class="form-control" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="allocRoute" class="form-label">Route Scope</label>
+                <select id="allocRoute" class="form-control">
+                  <option value="">All Active Routes</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+              <button type="submit" id="btnRunAlloc" class="btn btn-primary">Execute Allocation</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filter Existing Results Card -->
+        <div class="card" style="margin-bottom: 24px; padding: 16px 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span style="font-weight: 600; font-size: 13px;">Filter Results:</span>
+              <input type="date" id="allocFilterDate" class="form-control" style="width: 170px;">
+              <select id="allocFilterShift" class="form-control" style="width: 200px;"></select>
+            </div>
+            <button id="btnFilterAllocations" class="btn btn-secondary btn-sm">Refresh Results</button>
+          </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="allocationsListContainer"></div>
+      </section>
+
+      <!-- VIEW 2: TRAVEL DECLARATIONS -->
+      <section class="admin-view" id="viewDeclarations">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Student Travel Declarations Manifest</h3>
+              <p class="card-subtitle">Declarations grouped by route, date, and shift</p>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="declFilterDate" class="form-label">Date</label>
+              <input type="date" id="declFilterDate" class="form-control" style="width: 170px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="declFilterShift" class="form-label">Shift</label>
+              <select id="declFilterShift" class="form-control" style="width: 200px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="declFilterRoute" class="form-label">Route</label>
+              <select id="declFilterRoute" class="form-control" style="width: 240px;"></select>
+            </div>
+            <button id="btnFilterDeclarations" class="btn btn-secondary" style="height: 42px;">Filter Declarations</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Full Name</th>
+                  <th>Department</th>
+                  <th>Route</th>
+                  <th>Shift</th>
+                  <th>Travel Intent</th>
+                  <th>Declared Timestamp</th>
+                </tr>
+              </thead>
+              <tbody id="declarationsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: BUS FLEET MANAGEMENT -->
+      <section class="admin-view" id="viewBuses">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Bus Fleet Inventory &amp; Availability</h3>
+              <p class="card-subtitle">Manage college transport vehicles, capacities, and active status</p>
+            </div>
+            <button id="btnNewBus" class="btn btn-primary btn-sm">+ Add New Bus</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Bus Registration</th>
+                  <th>Vehicle Label / Model</th>
+                  <th>Seating Capacity</th>
+                  <th>Status</th>
+                  <th>Added On</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="busesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: ROUTE MANAGEMENT -->
+      <section class="admin-view" id="viewRoutes">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Bus Routes &amp; Stops Configuration</h3>
+              <p class="card-subtitle">Manage route codes, itineraries, and operational status</p>
+            </div>
+            <button id="btnNewRoute" class="btn btn-primary btn-sm">+ Add New Route</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Route Code</th>
+                  <th>Route Name</th>
+                  <th>Origin Location</th>
+                  <th>Intermediate Stops</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="routesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: SYSTEM METRICS -->
+      <section class="admin-view" id="viewMetrics">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Live System Metrics &amp; Operational Integrity</h3>
+              <p class="card-subtitle">Factual database statistics without fabrication</p>
+            </div>
+          </div>
+          <div id="metricsContainer"></div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: PASSENGER MANIFEST -->
+  <div class="modal-backdrop" id="manifestModal">
+    <div class="modal-dialog" style="max-width: 750px;">
+      <div class="modal-header">
+        <h3>Route Passenger Manifest &amp; Seat Assignments</h3>
+        <button class="modal-close" onclick="closeManifestModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="manifestModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeManifestModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT BUS -->
+  <div class="modal-backdrop" id="busModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="busModalTitle">Add New Bus</h3>
+        <button class="modal-close" onclick="closeBusModal()">&times;</button>
+      </div>
+      <form id="busForm">
+        <div class="modal-body">
+          <div id="busModalAlert"></div>
+          <input type="hidden" id="busId">
+          <div class="form-group">
+            <label for="busNumber" class="form-label">Bus Registration Number <span class="required">*</span></label>
+            <input type="text" id="busNumber" class="form-control" placeholder="e.g. TN-09-CB-1010" required>
+          </div>
+          <div class="form-group">
+            <label for="busLabel" class="form-label">Vehicle Label / Model <span class="required">*</span></label>
+            <input type="text" id="busLabel" class="form-control" placeholder="e.g. Bus 07 (Ashok Leyland 40S)" required>
+          </div>
+          <div class="form-group">
+            <label for="busCapacity" class="form-label">Seating Capacity <span class="required">*</span></label>
+            <input type="number" id="busCapacity" class="form-control" min="1" max="100" value="40" required>
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="busActive" checked>
+            <label for="busActive" style="font-size: 13px; font-weight: 600;">Active in fleet</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeBusModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Bus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT ROUTE -->
+  <div class="modal-backdrop" id="routeModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="routeModalTitle">Add New Route</h3>
+        <button class="modal-close" onclick="closeRouteModal()">&times;</button>
+      </div>
+      <form id="routeForm">
+        <div class="modal-body">
+          <div id="routeModalAlert"></div>
+          <input type="hidden" id="routeId">
+          <div class="form-group">
+            <label for="routeCode" class="form-label">Route Code <span class="required">*</span></label>
+            <input type="text" id="routeCode" class="form-control" placeholder="e.g. RT-106" required>
+          </div>
+          <div class="form-group">
+            <label for="routeName" class="form-label">Route Name <span class="required">*</span></label>
+            <input type="text" id="routeName" class="form-control" placeholder="e.g. Anna Nagar Express" required>
+          </div>
+          <div class="form-group">
+            <label for="routeStart" class="form-label">Origin Location <span class="required">*</span></label>
+            <input type="text" id="routeStart" class="form-control" placeholder="e.g. Anna Nagar Roundtana" required>
+          </div>
+          <div class="form-group">
+            <label for="routeEnd" class="form-label">Destination</label>
+            <input type="text" id="routeEnd" class="form-control" value="College Main Campus">
+          </div>
+          <div class="form-group">
+            <label for="routeStops" class="form-label">Intermediate Stops Description</label>
+            <textarea id="routeStops" class="form-control" rows="3" placeholder="Comma-separated stop locations"></textarea>
+          </div>
+          <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="routeActive" checked>
+            <label for="routeActive" style="font-size: 13px; font-weight: 600;">Route is active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeRouteModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Route</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Institutional Footer -->
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <div>
+        <strong style="color: #ffffff;">College Transportation &amp; Fleet Management System</strong>
+        <p style="margin-top: 4px;">Administrative Fleet Dispatch Console &bull; Academic Year 2026-2027</p>
+      </div>
+      <ul class="footer-links">
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms &amp; Conditions</a></li>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="student.html">Student Portal</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      &copy; 2026 College Transportation Logistics Office. Authenticated session security active.
+    </div>
+  </footer>
+
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.college.busallocation.DuplicatePreventionTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.363 s -- in com.college.busallocation.DuplicatePreventionTest
